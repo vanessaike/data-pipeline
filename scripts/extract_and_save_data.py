@@ -12,10 +12,11 @@ mongodb_cluster = os.getenv("MONGODB_CLUSTER")
 uri = f"mongodb+srv://{mongodb_user}:{mongodb_password}@{mongodb_cluster}.g7v04mw.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(uri, server_api=ServerApi('1'))
 
-def connect_mongo(uri):
+def connect_mongo():
     try:
         client.admin.command('ping')
         print("Pinged your deployment. You successfully connected to MongoDB!")
+        return client
     except Exception as e:
         print(e)
 
@@ -39,13 +40,14 @@ def insert_data(collection, data):
     return collection.count_documents({})
 
 # function executions
-try:
-    connect_mongo(uri)
-    db = create_connect_db(client, "test_products")
-    collection = create_connect_collection(db, "products")
-    data = extract_api_data("https://labdados.com/produtos")
-    inserted_data = insert_data(collection, data)
-    print(inserted_data, " documents inserted!")
-    client.close()
-except Exception as e:
-    print(e)
+if __name__ == "__main__":
+    try:
+        connect_mongo()
+        db = create_connect_db(client, "test_products")
+        collection = create_connect_collection(db, "products")
+        data = extract_api_data("https://labdados.com/produtos")
+        inserted_data = insert_data(collection, data)
+        print(inserted_data, " documents inserted!")
+        client.close()
+    except Exception as e:
+        print(e)
